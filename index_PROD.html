@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интернет-магазин - Главная</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>ShopStore</h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Поиск товаров..." class="search-input" id="search-input">
+                <button class="search-btn" onclick="searchProducts()">Найти</button>
+            </div>
+            <div class="header-icons">
+                <div class="api-key-container">
+                    <input type="text" placeholder="API Key" id="api-key-input" class="api-key-input">
+                    <button class="api-key-btn" onclick="saveApiKey()">Сохранить</button>
+                </div>
+                <a href="#" class="icon-link" id="cart-link">
+                    Корзина (<span class="cart-count">0</span>)
+                </a>
+                <a href="#" class="icon-link" id="account-link">
+                    Личный кабинет
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="notifications-container" id="notifications"></div>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <h2>Фильтры</h2>
+            <form id="filters-form" onsubmit="applyFilters(); return false;">
+                <div class="filter-section">
+                    <h3>Категория товара</h3>
+                    <label>
+                        <input type="checkbox" name="category" value="electronics">
+                        Электроника
+                    </label>
+                    <label>
+                        <input type="checkbox" name="category" value="clothing">
+                        Одежда
+                    </label>
+                    <label>
+                        <input type="checkbox" name="category" value="books">
+                        Книги
+                    </label>
+                    <label>
+                        <input type="checkbox" name="category" value="home">
+                        Дом и сад
+                    </label>
+                    <label>
+                        <input type="checkbox" name="category" value="sports">
+                        Спорт
+                    </label>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Стоимость</h3>
+                    <label>
+                        От: <input type="number" id="price-from" min="0" value="0">
+                    </label>
+                    <label>
+                        До: <input type="number" id="price-to" min="0" value="100000">
+                    </label>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Товары со скидкой</h3>
+                    <label>
+                        <input type="checkbox" id="discount-only">
+                        Только товары со скидкой
+                    </label>
+                </div>
+
+                <button type="submit" class="apply-btn">Применить</button>
+            </form>
+        </aside>
+
+        <section class="catalog-section">
+            <div class="catalog-header">
+                <h2>Каталог</h2>
+                <div>
+                    <label>Сортировка: </label>
+                    <select id="sort-select" onchange="sortProducts()">
+                        <option value="default">По умолчанию</option>
+                        <option value="price-asc">Цена: по возрастанию</option>
+                        <option value="price-desc">Цена: по убыванию</option>
+                        <option value="rating-desc">Рейтинг: по убыванию</option>
+                        <option value="rating-asc">Рейтинг: по возрастанию</option>
+                        <option value="name-asc">Название: А-Я</option>
+                        <option value="name-desc">Название: Я-А</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="products-grid" id="products-grid">
+            </div>
+
+            <div class="load-more-container">
+                <button class="load-more-btn" id="load-more-btn" onclick="loadMore()" style="display: none;">Загрузить ещё</button>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <h3>ShopStore</h3>
+                <p>Интернет-магазин качественных товаров</p>
+            </div>
+            <div>
+                <h4>Контакты</h4>
+                <p>Телефон</p>
+                <p>Email</p>
+                <p>Адрес</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>ShopStore</p>
+        </div>
+    </footer>
+
+    <script src="scripts/order_PROD.js"></script>
+</body>
+</html>

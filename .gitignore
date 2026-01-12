@@ -1,0 +1,13 @@
+*.js
+*.css
+*.html
+
+!*_PROD.js
+!*_PROD.css
+!*_PROD.html
+
+!.gitignore
+!README.md
+
+/Web-Mospolytech/
+/other/
