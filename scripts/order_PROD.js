@@ -56,6 +56,41 @@ function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
+function saveOrder(orderData) {
+    let orders = [];
+    let nextOrderId = 1;
+    
+    const saved = localStorage.getItem('orders');
+    if (saved) {
+        orders = JSON.parse(saved);
+        if (orders.length > 0) {
+            nextOrderId = Math.max.apply(null, orders.map(function(o) { return o.id; })) + 1;
+        }
+    }
+    const savedId = localStorage.getItem('nextOrderId');
+    if (savedId) {
+        nextOrderId = parseInt(savedId);
+    }
+    
+    const order = {
+        id: nextOrderId++,
+        createdAt: new Date().toISOString(),
+        name: orderData.name,
+        email: orderData.email,
+        phone: orderData.phone,
+        newsletter: orderData.newsletter || false,
+        address: orderData.address,
+        date: orderData.date,
+        time: orderData.time,
+        comment: orderData.comment || '',
+        items: JSON.parse(JSON.stringify(orderData.items))
+    };
+    
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+    localStorage.setItem('nextOrderId', nextOrderId);
+}
+
 function updateCartCount() {
     let total = 0;
     for (let i = 0; i < cart.length; i++) {

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интернет-магазин - Личный кабинет</title>
+    <link rel="stylesheet" href="styles/main_PROD.css">
+    <link rel="stylesheet" href="styles/lk.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>ShopStore</h1>
+                </a>
+            </div>
+            <div class="header-icons">
+                <a href="index.html" class="icon-link">
+                    Каталог
+                </a>
+                <a href="cart.html" class="icon-link">
+                    Корзина
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="notifications-container" id="notifications"></div>
+
+    <div class="lk-main-wrapper">
+        <section class="orders-section">
+            <h2 class="section-title">Заказы</h2>
+            <div class="orders-table-container">
+                <table class="orders-table" id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Дата и время оформления</th>
+                            <th>Состав</th>
+                            <th>Итоговая стоимость</th>
+                            <th>Дата доставки</th>
+                            <th>Временной интервал доставки</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-tbody">
+                    </tbody>
+                </table>
+                <div class="orders-empty" id="orders-empty" style="display: none;">
+                    <p>У вас пока нет оформленных заказов.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="view-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Просмотр заказа</h3>
+                <button class="modal-close" onclick="closeModal('view-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="view-modal-body">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Редактирование заказа</h3>
+                <button class="modal-close" onclick="closeModal('edit-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="order-form" id="edit-order-form" onsubmit="saveEditedOrder(event); return false;">
+                    <input type="hidden" id="edit-order-id">
+                    <div class="form-group">
+                        <label for="edit-order-address">Адрес доставки *</label>
+                        <input type="text" id="edit-order-address" name="address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-order-date">Дата доставки *</label>
+                        <input type="date" id="edit-order-date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-order-time">Временной интервал доставки *</label>
+                        <select id="edit-order-time" name="time" required>
+                            <option value="">Выберите интервал</option>
+                            <option value="09:00-12:00">09:00-12:00</option>
+                            <option value="12:00-15:00">12:00-15:00</option>
+                            <option value="15:00-18:00">15:00-18:00</option>
+                            <option value="18:00-21:00">18:00-21:00</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-order-comment">Комментарий к заказу</label>
+                        <textarea id="edit-order-comment" name="comment" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Сохранить изменения</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="delete-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Удаление заказа</h3>
+                <button class="modal-close" onclick="closeModal('delete-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить этот заказ?</p>
+                <input type="hidden" id="delete-order-id">
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeModal('delete-modal')">Отмена</button>
+                    <button class="btn-delete" onclick="confirmDeleteOrder()">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <h3>ShopStore</h3>
+                <p>Интернет-магазин качественных товаров</p>
+            </div>
+            <div>
+                <h4>Контакты</h4>
+                <p>Телефон:</p>
+                <p>Email:</p>
+                <p>Адрес:</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>ShopStore</p>
+        </div>
+    </footer>
+
+    <script src="scripts/order_PROD.js"></script>
+    <script src="scripts/lk.js"></script>
+</body>
+</html>
+

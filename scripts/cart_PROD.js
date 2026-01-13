@@ -95,7 +95,8 @@ function submitOrder(event) {
         items: cart
     };
     
-    console.log('Order data:', orderData);
+    saveOrder(orderData);
+    
     showNotification('Заказ успешно оформлен!', 'success');
     
     cart = [];
