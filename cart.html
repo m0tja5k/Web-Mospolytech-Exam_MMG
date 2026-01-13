@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интернет-магазин - Корзина</title>
+    <link rel="stylesheet" href="styles/main_PROD.css">
+    <link rel="stylesheet" href="styles/cart.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <h1>ShopStore</h1>
+                </a>
+            </div>
+            <div class="header-icons">
+                <a href="index.html" class="icon-link">
+                    Каталог
+                </a>
+                <a href="#" class="icon-link" id="account-link">
+                    Личный кабинет
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="notifications-container" id="notifications"></div>
+
+    <div class="cart-main-wrapper">
+        <section class="cart-section">
+            <h2 class="section-title">Корзина</h2>
+            <div class="cart-items-grid" id="cart-items-grid">
+                <!-- Товары корзины будут вставлены здесь -->
+            </div>
+            <div class="cart-empty" id="cart-empty" style="display: none;">
+                <p>Корзина пуста. Перейдите в каталог, чтобы добавить товары.</p>
+            </div>
+        </section>
+
+        <section class="order-section">
+            <h2 class="section-title">Оформление заказа</h2>
+            <form class="order-form" id="order-form" onsubmit="submitOrder(event); return false;">
+                <div class="form-group">
+                    <label for="order-name">Имя *</label>
+                    <input type="text" id="order-name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="order-email">Email *</label>
+                    <input type="email" id="order-email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="order-phone">Телефон *</label>
+                    <input type="text" id="order-phone" name="phone" required>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="order-newsletter" name="newsletter">
+                        Согласие на получение рассылки
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="order-address">Адрес доставки *</label>
+                    <input type="text" id="order-address" name="address" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="order-date">Дата доставки *</label>
+                    <input type="date" id="order-date" name="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="order-time">Временной интервал доставки *</label>
+                    <select id="order-time" name="time" required>
+                        <option value="">Выберите интервал</option>
+                        <option value="09:00-12:00">09:00-12:00</option>
+                        <option value="12:00-15:00">12:00-15:00</option>
+                        <option value="15:00-18:00">15:00-18:00</option>
+                        <option value="18:00-21:00">18:00-21:00</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="order-comment">Комментарий к заказу</label>
+                    <textarea id="order-comment" name="comment" rows="4"></textarea>
+                </div>
+
+                <button type="submit" class="submit-order-btn">Оформить заказ</button>
+            </form>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <h3>ShopStore</h3>
+                <p>Интернет-магазин качественных товаров</p>
+            </div>
+            <div>
+                <h4>Контакты</h4>
+                <p>Телефон:</p>
+                <p>Email:</p>
+                <p>Адрес</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>ShopStore</p>
+        </div>
+    </footer>
+
+    <script src="scripts/order_PROD.js"></script>
+    <script src="scripts/cart.js"></script>
+</body>
+</html>
+

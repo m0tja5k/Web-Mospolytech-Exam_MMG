@@ -83,7 +83,15 @@ async function loadProducts() {
         
         allProducts = await response.json();
         currentProducts = allProducts;
-        renderProducts();
+        
+        const productsGrid = document.getElementById('products-grid');
+        if (productsGrid) {
+            renderProducts();
+        }
+        
+        if (typeof renderCartItems === 'function') {
+            renderCartItems();
+        }
     } catch (error) {
         showNotification('Не удалось загрузить товары: ' + error.message);
     }
@@ -220,26 +228,180 @@ function showNotification(message, type) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadApiKey();
-    loadCart();
-    loadProducts();
-    
+    const productsGrid = document.getElementById('products-grid');
     const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchProducts();
-            }
-        });
-    }
     
-    const apiKeyInput = document.getElementById('api-key-input');
-    if (apiKeyInput) {
-        apiKeyInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                saveApiKey();
-            }
-        });
+    if (productsGrid || searchInput) {
+        loadApiKey();
+        loadCart();
+        loadProducts();
+        
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchProducts();
+                }
+            });
+        }
+        
+        const apiKeyInput = document.getElementById('api-key-input');
+        if (apiKeyInput) {
+            apiKeyInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveApiKey();
+                }
+            });
+        }
     }
 });
 
+function searchProducts() {
+    const searchInput = document.getElementById('search-input');
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    
+    if (searchTerm === '') {
+        currentProducts = allProducts;
+        displayedCount = 9;
+        renderProducts();
+        return;
+    }
+    
+    async function doSearch() {
+        try {
+            const url = getApiUrl('/exam-2024-1/api/goods?query=' + encodeURIComponent(searchTerm));
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (errorData.error && errorData.error.indexOf('авторизац') > -1) {
+                    showNotification('Необходимо указать API ключ для поиска', 'error');
+                    return;
+                }
+                throw new Error('Ошибка поиска');
+            }
+            
+            currentProducts = await response.json();
+            displayedCount = 9;
+            renderProducts();
+            
+            if (currentProducts.length === 0) {
+                showNotification('Товары не найдены', 'info');
+            }
+        } catch (error) {
+            showNotification('Ошибка поиска: ' + error.message);
+        }
+    }
+    
+    doSearch();
+}
+
+function applyFilters() {
+    const form = document.getElementById('filters-form');
+    const checkboxes = form.querySelectorAll('input[name="category"]:checked');
+    const selectedCategories = [];
+    
+    for (let i = 0; i < checkboxes.length; i++) {
+        selectedCategories.push(checkboxes[i].value);
+    }
+    
+    const priceFrom = parseFloat(document.getElementById('price-from').value) || 0;
+    const priceTo = parseFloat(document.getElementById('price-to').value) || 1000000;
+    const discountOnly = document.getElementById('discount-only').checked;
+    
+    let filtered = [];
+    
+    for (let i = 0; i < allProducts.length; i++) {
+        const product = allProducts[i];
+        let include = true;
+        
+        if (selectedCategories.length > 0) {
+            const mainCat = product.main_category.toLowerCase();
+            const subCat = product.sub_category ? product.sub_category.toLowerCase() : '';
+            let found = false;
+            
+            for (let j = 0; j < selectedCategories.length; j++) {
+                const cat = selectedCategories[j].toLowerCase();
+                if (mainCat.includes(cat) || subCat.includes(cat)) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                include = false;
+            }
+        }
+        
+        if (include) {
+            const price = product.discount_price && product.discount_price < product.actual_price 
+                ? product.discount_price 
+                : product.actual_price;
+            
+            if (price < priceFrom || price > priceTo) {
+                include = false;
+            }
+        }
+        
+        if (include && discountOnly) {
+            if (!product.discount_price || product.discount_price >= product.actual_price) {
+                include = false;
+            }
+        }
+        
+        if (include) {
+            filtered.push(product);
+        }
+    }
+    
+    currentProducts = filtered;
+    displayedCount = 9;
+    renderProducts();
+    showNotification('Фильтры применены', 'success');
+}
+
+function sortProducts() {
+    const select = document.getElementById('sort-select');
+    const sortType = select.value;
+    
+    const sorted = [];
+    for (let i = 0; i < currentProducts.length; i++) {
+        sorted.push(currentProducts[i]);
+    }
+    
+    if (sortType === 'price-asc') {
+        sorted.sort(function(a, b) {
+            const priceA = a.discount_price && a.discount_price < a.actual_price ? a.discount_price : a.actual_price;
+            const priceB = b.discount_price && b.discount_price < b.actual_price ? b.discount_price : b.actual_price;
+            return priceA - priceB;
+        });
+    } else if (sortType === 'price-desc') {
+        sorted.sort(function(a, b) {
+            const priceA = a.discount_price && a.discount_price < a.actual_price ? a.discount_price : a.actual_price;
+            const priceB = b.discount_price && b.discount_price < b.actual_price ? b.discount_price : b.actual_price;
+            return priceB - priceA;
+        });
+    } else if (sortType === 'rating-desc') {
+        sorted.sort(function(a, b) {
+            return b.rating - a.rating;
+        });
+    } else if (sortType === 'rating-asc') {
+        sorted.sort(function(a, b) {
+            return a.rating - b.rating;
+        });
+    } else if (sortType === 'name-asc') {
+        sorted.sort(function(a, b) {
+            if (a.name < b.name) return -1;
+            if (a.name > b.name) return 1;
+            return 0;
+        });
+    } else if (sortType === 'name-desc') {
+        sorted.sort(function(a, b) {
+            if (a.name > b.name) return -1;
+            if (a.name < b.name) return 1;
+            return 0;
+        });
+    }
+    
+    currentProducts = sorted;
+    renderProducts();
+}
