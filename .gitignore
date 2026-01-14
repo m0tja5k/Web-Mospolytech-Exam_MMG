@@ -4,8 +4,9 @@
 !*_PROD.js
 !*_PROD.css
 
-!.gitignore
+/.gitignore
 !README.md
 
 /Web-Mospolytech/
 /other/
+/API_DOCUMENTATION.md

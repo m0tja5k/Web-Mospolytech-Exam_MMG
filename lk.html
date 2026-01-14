@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интернет-магазин - Личный кабинет</title>
     <link rel="stylesheet" href="styles/main_PROD.css">
-    <link rel="stylesheet" href="styles/lk_PROD.css">
+    <link rel="stylesheet" href="styles/lk.css">
 </head>
 <body>
     <header class="header">
@@ -75,6 +75,18 @@
                 <form class="order-form" id="edit-order-form" onsubmit="saveEditedOrder(event); return false;">
                     <input type="hidden" id="edit-order-id">
                     <div class="form-group">
+                        <label for="edit-order-name">Имя *</label>
+                        <input type="text" id="edit-order-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-order-email">Email *</label>
+                        <input type="email" id="edit-order-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-order-phone">Телефон *</label>
+                        <input type="text" id="edit-order-phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
                         <label for="edit-order-address">Адрес доставки *</label>
                         <input type="text" id="edit-order-address" name="address" required>
                     </div>
@@ -86,10 +98,10 @@
                         <label for="edit-order-time">Временной интервал доставки *</label>
                         <select id="edit-order-time" name="time" required>
                             <option value="">Выберите интервал</option>
-                            <option value="09:00-12:00">09:00-12:00</option>
-                            <option value="12:00-15:00">12:00-15:00</option>
-                            <option value="15:00-18:00">15:00-18:00</option>
-                            <option value="18:00-21:00">18:00-21:00</option>
+                            <option value="08:00-12:00">08:00-12:00</option>
+                            <option value="12:00-14:00">12:00-14:00</option>
+                            <option value="14:00-18:00">14:00-18:00</option>
+                            <option value="18:00-22:00">18:00-22:00</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -112,8 +124,8 @@
                 <p>Вы уверены, что хотите удалить этот заказ?</p>
                 <input type="hidden" id="delete-order-id">
                 <div class="modal-actions">
-                    <button class="btn-cancel" onclick="closeModal('delete-modal')">Отмена</button>
-                    <button class="btn-delete" onclick="confirmDeleteOrder()">Удалить</button>
+                    <button class="btn-cancel" onclick="closeModal('delete-modal')">Нет</button>
+                    <button class="btn-delete" onclick="confirmDeleteOrder()">Да</button>
                 </div>
             </div>
         </div>
@@ -138,7 +150,7 @@
     </footer>
 
     <script src="scripts/order_PROD.js"></script>
-    <script src="scripts/lk.js"></script>
+    <script src="scripts/lk_PROD.js"></script>
 </body>
 </html>
 

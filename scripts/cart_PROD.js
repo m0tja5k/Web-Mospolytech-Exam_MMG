@@ -11,6 +11,7 @@ function renderCartItems() {
         if (emptyMessage) {
             emptyMessage.style.display = 'block';
         }
+        updateTotalPrice();
         return;
     }
     
@@ -30,6 +31,8 @@ function renderCartItems() {
             grid.appendChild(card);
         }
     }
+    
+    updateTotalPrice();
 }
 
 function createCartItemCard(product, cartItem) {
@@ -68,10 +71,56 @@ function removeFromCart(productId) {
     saveCart();
     updateCartCount();
     renderCartItems();
+    updateTotalPrice();
     showNotification('Товар удален из корзины', 'success');
 }
 
-function submitOrder(event) {
+function calculateDeliveryPrice(date, time) {
+    if (!date) return 200;
+    
+    const deliveryDate = new Date(date);
+    const dayOfWeek = deliveryDate.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    
+    let basePrice = 200;
+    
+    if (isWeekend) {
+        basePrice += 300;
+    } else if (time) {
+        const timeStart = time.split('-')[0];
+        const hour = parseInt(timeStart.split(':')[0]);
+        if (hour >= 18) {
+            basePrice += 200;
+        }
+    }
+    
+    return basePrice;
+}
+
+function calculateTotalPrice() {
+    let itemsTotal = 0;
+    for (let i = 0; i < cart.length; i++) {
+        itemsTotal += cart[i].price * cart[i].quantity;
+    }
+    
+    const dateInput = document.getElementById('order-date');
+    const timeSelect = document.getElementById('order-time');
+    const date = dateInput ? dateInput.value : '';
+    const time = timeSelect ? timeSelect.value : '';
+    
+    const deliveryPrice = calculateDeliveryPrice(date, time);
+    return itemsTotal + deliveryPrice;
+}
+
+function updateTotalPrice() {
+    const totalElement = document.getElementById('order-total-price');
+    if (!totalElement) return;
+    
+    const total = calculateTotalPrice();
+    totalElement.textContent = total + ' ₽';
+}
+
+async function submitOrder(event) {
     event.preventDefault();
     
     if (cart.length === 0) {
@@ -79,31 +128,102 @@ function submitOrder(event) {
         return;
     }
     
+    if (!apiKey) {
+        loadApiKey();
+        if (!apiKey) {
+            showNotification('Необходимо указать API ключ для оформления заказа', 'error');
+            return;
+        }
+    }
+    
     const form = document.getElementById('order-form');
     if (!form) return;
     
     const formData = new FormData(form);
+    
+    const dateValue = formData.get('date');
+    let deliveryDate = '';
+    if (dateValue) {
+        const date = new Date(dateValue);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        deliveryDate = day + '.' + month + '.' + year;
+    }
+    
     const orderData = {
-        name: formData.get('name'),
+        full_name: formData.get('name'),
         email: formData.get('email'),
         phone: formData.get('phone'),
-        newsletter: formData.get('newsletter') === 'on',
-        address: formData.get('address'),
-        date: formData.get('date'),
-        time: formData.get('time'),
-        comment: formData.get('comment'),
-        items: cart
+        delivery_address: formData.get('address'),
+        delivery_date: deliveryDate,
+        delivery_interval: formData.get('time'),
+        good_ids: cart.map(function(item) {
+            return item.id;
+        })
     };
     
-    saveOrder(orderData);
+    const newsletter = formData.get('newsletter') === 'on';
+    if (newsletter) {
+        orderData.subscribe = true;
+    }
     
-    showNotification('Заказ успешно оформлен!', 'success');
+    const comment = formData.get('comment');
+    if (comment && comment.trim()) {
+        orderData.comment = comment.trim();
+    }
     
-    cart = [];
-    saveCart();
-    updateCartCount();
-    renderCartItems();
-    form.reset();
+    console.log('Отправка заказа:', JSON.stringify(orderData, null, 2));
+    
+    try {
+        const url = getApiUrl('/exam-2024-1/api/orders');
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (!response.ok) {
+            let errorMessage = 'Ошибка оформления заказа';
+            try {
+                const errorData = await response.json();
+                if (errorData.error) {
+                    errorMessage = errorData.error;
+                    if (errorData.error.indexOf('авторизац') > -1) {
+                        showNotification('Необходимо указать API ключ для оформления заказа', 'error');
+                        return;
+                    }
+                }
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                }
+                console.error('Ошибка оформления заказа:', errorData);
+            } catch (e) {
+                console.error('Ошибка парсинга ответа:', e);
+            }
+            showNotification(errorMessage, 'error');
+            return;
+        }
+        
+        await response.json();
+        
+        showNotification('Заказ успешно оформлен!', 'success');
+        
+        cart = [];
+        saveCart();
+        updateCartCount();
+        renderCartItems();
+        form.reset();
+        updateTotalPrice();
+        
+        setTimeout(function() {
+            window.location.href = 'index.html';
+        }, 1500);
+    } catch (error) {
+        showNotification('Не удалось оформить заказ: ' + error.message, 'error');
+    }
 }
 
 
@@ -114,4 +234,16 @@ document.addEventListener('DOMContentLoaded', function() {
     loadApiKey();
     loadCart();
     loadProducts();
+    
+    const dateInput = document.getElementById('order-date');
+    const timeSelect = document.getElementById('order-time');
+    
+    if (dateInput) {
+        dateInput.addEventListener('change', updateTotalPrice);
+    }
+    if (timeSelect) {
+        timeSelect.addEventListener('change', updateTotalPrice);
+    }
+    
+    updateTotalPrice();
 });
