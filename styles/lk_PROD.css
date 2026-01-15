@@ -61,14 +61,12 @@
 }
 
 .action-btn {
-    background: none;
     border: none;
     cursor: pointer;
     padding: 5px 10px;
     margin: 0 3px;
     font-size: 16px;
     color: #333;
-    text-decoration: underline;
 }
 
 .action-btn:hover {
@@ -267,4 +265,114 @@
 
 .order-item:last-child {
     border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .lk-main-wrapper {
+        padding: 0 10px;
+    }
+
+    .orders-section {
+        padding: 15px;
+    }
+
+    .section-title {
+        font-size: 20px;
+    }
+
+    .orders-table {
+        font-size: 14px;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 8px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lk-main-wrapper {
+        margin: 10px auto;
+        padding: 0 10px;
+    }
+
+    .orders-section {
+        padding: 15px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    .orders-table {
+        font-size: 12px;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        padding: 6px 4px;
+    }
+
+    .orders-table th:first-child,
+    .orders-table td:first-child {
+        display: none;
+    }
+
+    .actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .action-btn {
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+
+    .modal-header {
+        padding: 15px;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-delete {
+        width: 100%;
+    }
+
+    .submit-btn {
+        width: 100%;
+        align-self: stretch;
+    }
 }

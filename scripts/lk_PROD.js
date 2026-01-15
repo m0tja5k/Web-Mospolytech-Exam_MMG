@@ -56,25 +56,36 @@ function createOrderRow(order, index) {
     const row = document.createElement('tr');
     
     let itemsText = '';
-    if (order.items && order.items.length > 0) {
-        for (let i = 0; i < order.items.length; i++) {
+    let totalPrice = 0;
+    
+    if (order.good_ids && order.good_ids.length > 0) {
+        const itemCounts = {};
+        for (let i = 0; i < order.good_ids.length; i++) {
+            const goodId = order.good_ids[i];
+            itemCounts[goodId] = (itemCounts[goodId] || 0) + 1;
+        }
+        
+        const itemIds = Object.keys(itemCounts);
+        for (let i = 0; i < itemIds.length; i++) {
             if (i > 0) {
                 itemsText = itemsText + ', ';
             }
-            const itemName = order.items[i].name || 'Товар #' + order.items[i].id;
+            const goodId = parseInt(itemIds[i]);
+            const product = allProducts.find(function(p) {
+                return p.id === goodId;
+            });
+            const itemName = product ? product.name : 'Товар #' + goodId;
             itemsText = itemsText + itemName;
+            
+            if (product) {
+                const price = product.discount_price && product.discount_price < product.actual_price 
+                    ? product.discount_price 
+                    : product.actual_price;
+                totalPrice = totalPrice + (price * itemCounts[goodId]);
+            }
         }
     } else {
         itemsText = 'Нет товаров';
-    }
-    
-    let totalPrice = 0;
-    if (order.items && order.items.length > 0) {
-        for (let i = 0; i < order.items.length; i++) {
-            const itemPrice = order.items[i].price || order.items[i].actual_price || 0;
-            const itemQuantity = order.items[i].quantity || 1;
-            totalPrice = totalPrice + (itemPrice * itemQuantity);
-        }
     }
     
     const createdAt = order.createdAt || order.created_at || new Date().toISOString();
@@ -116,21 +127,29 @@ async function viewOrder(orderId) {
         if (!modalBody) return;
         
         let totalPrice = 0;
-        if (order.items && order.items.length > 0) {
-            for (let i = 0; i < order.items.length; i++) {
-                const itemPrice = order.items[i].price || order.items[i].actual_price || 0;
-                const itemQuantity = order.items[i].quantity || 1;
-                totalPrice = totalPrice + (itemPrice * itemQuantity);
-            }
-        }
-        
         let itemsHtml = '';
-        if (order.items && order.items.length > 0) {
-            for (let i = 0; i < order.items.length; i++) {
-                const item = order.items[i];
-                const itemName = item.name || 'Товар';
-                const itemPrice = item.price || item.actual_price || 0;
-                const itemQuantity = item.quantity || 1;
+        
+        if (order.good_ids && order.good_ids.length > 0) {
+            const itemCounts = {};
+            for (let i = 0; i < order.good_ids.length; i++) {
+                const goodId = order.good_ids[i];
+                itemCounts[goodId] = (itemCounts[goodId] || 0) + 1;
+            }
+            
+            const itemIds = Object.keys(itemCounts);
+            for (let i = 0; i < itemIds.length; i++) {
+                const goodId = parseInt(itemIds[i]);
+                const product = allProducts.find(function(p) {
+                    return p.id === goodId;
+                });
+                const itemName = product ? product.name : 'Товар #' + goodId;
+                const itemQuantity = itemCounts[goodId];
+                const itemPrice = product 
+                    ? (product.discount_price && product.discount_price < product.actual_price 
+                        ? product.discount_price 
+                        : product.actual_price)
+                    : 0;
+                totalPrice = totalPrice + (itemPrice * itemQuantity);
                 itemsHtml = itemsHtml + '<div class="order-item">' + itemName + ' - ' + itemQuantity + ' шт. × ' + itemPrice + ' ₽</div>';
             }
         } else {
@@ -358,12 +377,33 @@ function closeModal(modalId) {
     modal.classList.remove('active');
 }
 
+async function loadProducts() {
+    try {
+        if (!apiKey) {
+            loadApiKey();
+        }
+        
+        const url = getApiUrl('/exam-2024-1/api/goods');
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            return;
+        }
+        
+        allProducts = await response.json();
+    } catch (error) {
+        console.error('Ошибка загрузки товаров:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const ordersTable = document.getElementById('orders-table');
     if (!ordersTable) return;
     
     loadApiKey();
-    loadOrders();
+    loadProducts().then(function() {
+        loadOrders();
+    });
     
     window.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal')) {

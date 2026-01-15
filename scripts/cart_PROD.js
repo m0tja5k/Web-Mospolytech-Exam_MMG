@@ -141,6 +141,14 @@ async function submitOrder(event) {
     
     const formData = new FormData(form);
     
+    const goodIds = [];
+    for (let i = 0; i < cart.length; i++) {
+        const cartItem = cart[i];
+        for (let j = 0; j < cartItem.quantity; j++) {
+            goodIds.push(cartItem.id);
+        }
+    }
+    
     const dateValue = formData.get('date');
     let deliveryDate = '';
     if (dateValue) {
@@ -158,15 +166,11 @@ async function submitOrder(event) {
         delivery_address: formData.get('address'),
         delivery_date: deliveryDate,
         delivery_interval: formData.get('time'),
-        good_ids: cart.map(function(item) {
-            return item.id;
-        })
+        good_ids: goodIds
     };
     
     const newsletter = formData.get('newsletter') === 'on';
-    if (newsletter) {
-        orderData.subscribe = true;
-    }
+    orderData.subscribe = newsletter;
     
     const comment = formData.get('comment');
     if (comment && comment.trim()) {

@@ -200,9 +200,11 @@ function createProductCard(product) {
         '<img src="' + product.image_url + '" alt="' + product.name + '" class="product-image" onerror="this.src=\'https://via.placeholder.com/300x200?text=No+Image\'">' +
         '<div class="product-info">' +
         '<h3 class="product-name" title="' + product.name + '">' + product.name + '</h3>' +
+        '<div class="product-card-bottom">' +
         '<div class="product-rating">' + stars + ' ' + product.rating + '</div>' +
         '<div class="product-price">' + priceHtml + '</div>' +
         '<button class="add-to-cart-btn" onclick="addToCart(' + product.id + ')">В корзину</button>' +
+        '</div>' +
         '</div>';
     
     return card;
