@@ -141,7 +141,12 @@ function renderProducts() {
     const productsToShow = currentProducts.slice(0, displayedCount);
     
     if (productsToShow.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; padding: 20px;">Товары не найдены</p>';
+        const searchInput = document.getElementById('search-input');
+        const searchTerm = searchInput && searchInput.value.trim();
+        const message = searchTerm 
+            ? 'Нет товаров, соответствующих вашему запросу'
+            : 'Товары не найдены';
+        grid.innerHTML = '<p style="text-align: center; padding: 20px;">' + message + '</p>';
         document.getElementById('load-more-btn').style.display = 'none';
         return;
     }
@@ -265,20 +270,43 @@ function showNotification(message, type) {
 document.addEventListener('DOMContentLoaded', function() {
     const productsGrid = document.getElementById('products-grid');
     const searchInput = document.getElementById('search-input');
-    
+
     if (productsGrid || searchInput) {
         loadApiKey();
         loadCart();
         loadProducts();
-        
+
         if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    fetchAutocompleteSuggestions(query);
+                } else {
+                    hideAutocomplete();
+                }
+            });
+
+            // Поиск по Enter
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
+                    e.preventDefault();
+                    hideAutocomplete();
                     searchProducts();
                 }
             });
+
+            searchInput.addEventListener('blur', function() {
+                setTimeout(hideAutocomplete, 200);
+            });
+
+            searchInput.addEventListener('focus', function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    fetchAutocompleteSuggestions(query);
+                }
+            });
         }
-        
+
         const apiKeyInput = document.getElementById('api-key-input');
         if (apiKeyInput) {
             apiKeyInput.addEventListener('keypress', function(e) {
@@ -287,12 +315,96 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
+
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            const searchInputWrapper = document.querySelector('.search-input-wrapper');
+            if (dropdown && searchInputWrapper && !searchInputWrapper.contains(e.target)) {
+                hideAutocomplete();
+            }
+        });
     }
 });
 
-function searchProducts() {
+async function fetchAutocompleteSuggestions(query) {
+    const trimmed = query.trim();
+    if (!trimmed) {
+        hideAutocomplete();
+        return;
+    }
+
+    try {
+        const url = getApiUrl('/exam-2024-1/api/autocomplete?query=' + encodeURIComponent(trimmed));
+        const response = await fetch(url);
+        if (!response.ok) {
+            hideAutocomplete();
+            return;
+        }
+
+        const suggestions = await response.json();
+        displayAutocomplete(suggestions);
+    } catch (e) {
+        hideAutocomplete();
+    }
+}
+
+function displayAutocomplete(suggestions) {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (!dropdown) return;
+    
+    if (!suggestions || suggestions.length === 0) {
+        hideAutocomplete();
+        return;
+    }
+    
+    dropdown.innerHTML = '';
+    
+    for (let i = 0; i < suggestions.length; i++) {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.textContent = suggestions[i];
+        item.addEventListener('click', function() {
+            selectAutocompleteSuggestion(suggestions[i]);
+        });
+        dropdown.appendChild(item);
+    }
+    
+    dropdown.classList.add('show');
+}
+
+function hideAutocomplete() {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (dropdown) {
+        dropdown.classList.remove('show');
+        dropdown.innerHTML = '';
+    }
+}
+
+function selectAutocompleteSuggestion(suggestion) {
     const searchInput = document.getElementById('search-input');
-    const searchTerm = searchInput.value.trim().toLowerCase();
+    if (!searchInput) return;
+    
+    const currentValue = searchInput.value.trim();
+    
+    if (currentValue === '') {
+        searchInput.value = suggestion;
+    } else {
+        const words = currentValue.split(/\s+/);
+        words[words.length - 1] = suggestion;
+        searchInput.value = words.join(' ');
+    }
+    
+    hideAutocomplete();
+    searchInput.focus();
+}
+
+async function searchProducts() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+
+    const searchTerm = searchInput.value.trim();
+    
+    hideAutocomplete();
     
     if (searchTerm === '') {
         currentProducts = allProducts;
@@ -300,34 +412,32 @@ function searchProducts() {
         renderProducts();
         return;
     }
-    
-    async function doSearch() {
-        try {
-            const url = getApiUrl('/exam-2024-1/api/goods?query=' + encodeURIComponent(searchTerm));
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                if (errorData.error && errorData.error.indexOf('авторизац') > -1) {
-                    showNotification('Необходимо указать API ключ для поиска', 'error');
-                    return;
-                }
-                throw new Error('Ошибка поиска');
+
+    try {
+        const url = getApiUrl('/exam-2024-1/api/goods?query=' + encodeURIComponent(searchTerm));
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (errorData.error && errorData.error.indexOf('авторизац') > -1) {
+                showNotification('Необходимо указать API ключ для поиска', 'error');
+                return;
             }
-            
-            currentProducts = await response.json();
-            displayedCount = 9;
-            renderProducts();
-            
-            if (currentProducts.length === 0) {
-                showNotification('Товары не найдены', 'info');
-            }
-        } catch (error) {
-            showNotification('Ошибка поиска: ' + error.message);
+            throw new Error('Ошибка поиска');
         }
+
+        currentProducts = await response.json();
+        displayedCount = 9;
+
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect && sortSelect.value !== 'default') {
+            sortProducts();
+        } else {
+            renderProducts();
+        }
+    } catch (error) {
+        showNotification('Ошибка поиска: ' + error.message);
     }
-    
-    doSearch();
 }
 
 function applyFilters() {

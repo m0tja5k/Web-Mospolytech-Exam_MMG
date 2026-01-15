@@ -13,7 +13,10 @@
                 <h1>ShopStore</h1>
             </div>
             <div class="search-bar">
-                <input type="text" placeholder="Поиск товаров..." class="search-input" id="search-input">
+                <div class="search-input-wrapper">
+                    <input type="text" placeholder="Поиск товаров..." class="search-input" id="search-input">
+                    <div class="autocomplete-dropdown" id="autocomplete-dropdown"></div>
+                </div>
                 <button class="search-btn" onclick="searchProducts()">Найти</button>
             </div>
             <div class="header-icons">
